@@ -103,7 +103,7 @@ extern "C" {
     pub fn wrenGetSlotString(vm: *mut WrenVM, slot: c_int) -> *const c_char;
     pub fn wrenGetSlotHandle(vm: *mut WrenVM, slot: c_int) -> *mut WrenHandle;
 
-    pub fn wrenSetSlotBool(vm: *mut WrenVM, slot: c_int, value: c_int);
+    pub fn wrenSetSlotBool(vm: *mut WrenVM, slot: c_int, value: bool);
     pub fn wrenSetSlotBytes(vm: *mut WrenVM, slot: c_int, bytes: *const c_char, length: size_t);
     pub fn wrenSetSlotDouble(vm: *mut WrenVM, slot: c_int, value: c_double);
     pub fn wrenSetSlotNewForeign(vm: *mut WrenVM,

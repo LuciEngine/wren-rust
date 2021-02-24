@@ -1,6 +1,6 @@
 [package]
 name = "wren"
-version = "0.1.12"
+version = "0.1.13"
 authors = ["Calvin Ikenberry"]
 description = "Bindings to the Wren scripting language API"
 readme = "README.md"
@@ -18,4 +18,4 @@ path = "./wren-sys"
 libc = "0.2"
 
 [dev-dependencies]
-lazy_static = "0.2"
+lazy_static = "1.4.0"

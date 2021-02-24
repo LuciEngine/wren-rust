@@ -3,7 +3,7 @@ use std::slice;
 use std::ffi::{CStr, CString};
 use std::io;
 use std::rc::Rc;
-use libc::{c_int, c_char};
+use libc::c_char;
 use ffi;
 use {ErrorType, Type, Pointer, InterpretResult};
 
@@ -53,7 +53,8 @@ impl Configuration {
     ///
     /// This also sets the printing and module loading functions to mimic those used in the CLI interpreter.
     pub fn new() -> Configuration {
-        let mut raw: ffi::WrenConfiguration = unsafe { mem::uninitialized() };
+        let mut raw: ffi::WrenConfiguration =
+            unsafe { mem::MaybeUninit::<ffi::WrenConfiguration>::uninit().assume_init() };
         unsafe { ffi::wrenInitConfiguration(&mut raw) }
         let mut cfg = Configuration(raw);
         cfg.set_write_fn(wren_write_fn!(default_write));
@@ -256,7 +257,7 @@ impl VM {
     /// Returns `None` if the value in `slot` isn't a string.
     pub fn get_slot_bytes(&mut self, slot: i32) -> Option<&[u8]> {
         if self.get_slot_type(slot) == Type::String {
-            let mut length = unsafe { mem::uninitialized() };
+            let mut length: i32 = 0;
             let ptr = unsafe { ffi::wrenGetSlotBytes(self.raw, slot, &mut length) };
             Some(unsafe { slice::from_raw_parts(ptr as *const u8, length as usize) })
         } else {
@@ -323,7 +324,7 @@ impl VM {
     /// Maps to `wrenSetSlotBool`.
     pub fn set_slot_bool(&mut self, slot: i32, value: bool) {
         self.ensure_slots(slot + 1);
-        unsafe { ffi::wrenSetSlotBool(self.raw, slot, value as c_int) }
+        unsafe { ffi::wrenSetSlotBool(self.raw, slot, value as bool) }
     }
 
     /// Maps to `wrenSetSlotBytes`.

@@ -1,4 +1,8 @@
-# wren-rust [![Crates.io](https://img.shields.io/crates/v/wren.svg)](https://crates.io/crates/wren) [![Documentation](https://docs.rs/wren/badge.svg)](https://docs.rs/wren)
+# wren-rust 
+
+[![Crates.io](https://img.shields.io/crates/v/wren.svg)](https://crates.io/crates/wren)
+[![Documentation](https://docs.rs/wren/badge.svg)](https://docs.rs/wren)
+
 Rust bindings to the [Wren scripting language](http://wren.io) API.
 
 Crate documentation is somewhat lacking at the moment.
