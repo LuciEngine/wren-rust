@@ -1,7 +1,7 @@
 #![allow(improper_ctypes)]
 
 extern crate libc;
-use libc::{c_void, size_t, c_char, c_int, c_double};
+use libc::{c_char, c_double, c_int, c_void, size_t};
 
 #[repr(C)]
 pub struct WrenVM;
@@ -9,18 +9,21 @@ pub struct WrenVM;
 #[repr(C)]
 pub struct WrenHandle;
 
-pub type WrenReallocateFn = Option<unsafe extern "C" fn(memory: *mut c_void, new_size: size_t)
-                                                        -> *mut c_void>;
+pub type WrenReallocateFn =
+    Option<unsafe extern "C" fn(memory: *mut c_void, new_size: size_t) -> *mut c_void>;
 pub type WrenForeignMethodFn = Option<unsafe extern "C" fn(vm: *mut WrenVM)>;
 pub type WrenFinalizerFn = Option<unsafe extern "C" fn(data: *mut c_void)>;
-pub type WrenLoadModuleFn = Option<unsafe extern "C" fn(vm: *mut WrenVM, name: *const c_char)
-                                                        -> *mut c_char>;
-pub type WrenBindForeignMethodFn = Option<unsafe extern "C" fn(vm: *mut WrenVM,
-                                                               module: *const c_char,
-                                                               class_name: *const c_char,
-                                                               is_static: c_int,
-                                                               signature: *const c_char)
-                                                               -> WrenForeignMethodFn>;
+pub type WrenLoadModuleFn =
+    Option<unsafe extern "C" fn(vm: *mut WrenVM, name: *const c_char) -> *mut c_char>;
+pub type WrenBindForeignMethodFn = Option<
+    unsafe extern "C" fn(
+        vm: *mut WrenVM,
+        module: *const c_char,
+        class_name: *const c_char,
+        is_static: c_int,
+        signature: *const c_char,
+    ) -> WrenForeignMethodFn,
+>;
 pub type WrenWriteFn = Option<unsafe extern "C" fn(vm: *mut WrenVM, text: *const c_char)>;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -31,11 +34,15 @@ pub enum WrenErrorType {
     StackTrace,
 }
 
-pub type WrenErrorFn = Option<unsafe extern "C" fn(vm: *mut WrenVM,
-                                                   _type: WrenErrorType,
-                                                   module: *const c_char,
-                                                   line: c_int,
-                                                   message: *const c_char)>;
+pub type WrenErrorFn = Option<
+    unsafe extern "C" fn(
+        vm: *mut WrenVM,
+        _type: WrenErrorType,
+        module: *const c_char,
+        line: c_int,
+        message: *const c_char,
+    ),
+>;
 
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -44,10 +51,13 @@ pub struct WrenForeignClassMethods {
     pub finalize: WrenFinalizerFn,
 }
 
-pub type WrenBindForeignClassFn = Option<unsafe extern "C" fn(vm: *mut WrenVM,
-                                                              module: *const c_char,
-                                                              class_name: *const c_char)
-                                                              -> WrenForeignClassMethods>;
+pub type WrenBindForeignClassFn = Option<
+    unsafe extern "C" fn(
+        vm: *mut WrenVM,
+        module: *const c_char,
+        class_name: *const c_char,
+    ) -> WrenForeignClassMethods,
+>;
 
 #[repr(C)]
 pub struct WrenConfiguration {
@@ -106,26 +116,26 @@ extern "C" {
     pub fn wrenSetSlotBool(vm: *mut WrenVM, slot: c_int, value: bool);
     pub fn wrenSetSlotBytes(vm: *mut WrenVM, slot: c_int, bytes: *const c_char, length: size_t);
     pub fn wrenSetSlotDouble(vm: *mut WrenVM, slot: c_int, value: c_double);
-    pub fn wrenSetSlotNewForeign(vm: *mut WrenVM,
-                                 slot: c_int,
-                                 class_slot: c_int,
-                                 size: size_t)
-                                 -> *mut c_void;
+    pub fn wrenSetSlotNewForeign(
+        vm: *mut WrenVM,
+        slot: c_int,
+        class_slot: c_int,
+        size: size_t,
+    ) -> *mut c_void;
     pub fn wrenSetSlotNewList(vm: *mut WrenVM, slot: c_int);
     pub fn wrenSetSlotNull(vm: *mut WrenVM, slot: c_int);
     pub fn wrenSetSlotString(vm: *mut WrenVM, slot: c_int, text: *const c_char);
     pub fn wrenSetSlotHandle(vm: *mut WrenVM, slot: c_int, handle: *mut WrenHandle);
 
     pub fn wrenGetListCount(vm: *mut WrenVM, slot: c_int) -> c_int;
-    pub fn wrenGetListElement(vm: *mut WrenVM,
-                              list_slot: c_int,
-                              index: c_int,
-                              element_slot: c_int);
+    pub fn wrenGetListElement(vm: *mut WrenVM, list_slot: c_int, index: c_int, element_slot: c_int);
     pub fn wrenInsertInList(vm: *mut WrenVM, list_slot: c_int, index: c_int, element_slot: c_int);
-    pub fn wrenGetVariable(vm: *mut WrenVM,
-                           module: *const c_char,
-                           name: *const c_char,
-                           slot: c_int);
+    pub fn wrenGetVariable(
+        vm: *mut WrenVM,
+        module: *const c_char,
+        name: *const c_char,
+        slot: c_int,
+    );
     pub fn wrenAbortFiber(vm: *mut WrenVM, slot: c_int);
     pub fn wrenGetUserData(vm: *mut WrenVM) -> *mut c_void;
     pub fn wrenSetUserData(vm: *mut WrenVM, user_data: *mut c_void);

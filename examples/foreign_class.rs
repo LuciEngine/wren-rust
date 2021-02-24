@@ -3,10 +3,10 @@ extern crate wren;
 #[macro_use]
 extern crate lazy_static;
 
+use std::collections::HashMap;
 use std::mem;
 use std::ptr;
-use std::collections::HashMap;
-use wren::{Pointer, VM, Configuration, ForeignMethodFn, ForeignClassMethods};
+use wren::{Configuration, ForeignClassMethods, ForeignMethodFn, Pointer, VM};
 
 pub struct Vec3 {
     pub x: f64,
@@ -28,9 +28,11 @@ impl Vec3 {
     }
 
     pub fn cross(&self, rhs: &Vec3) -> Vec3 {
-        Vec3::new((self.y * rhs.z) - (self.z * rhs.y),
-                  (self.z * rhs.x) - (self.x * rhs.z),
-                  (self.x * rhs.y) - (self.y * rhs.x))
+        Vec3::new(
+            (self.y * rhs.z) - (self.z * rhs.y),
+            (self.z * rhs.x) - (self.x * rhs.z),
+            (self.x * rhs.y) - (self.y * rhs.x),
+        )
     }
 }
 
@@ -43,7 +45,10 @@ impl ToString for Vec3 {
 lazy_static! {
     static ref FOREIGN_METHODS: HashMap<&'static str, ForeignMethodFn> = {
         let mut map = HashMap::new();
-        map.insert("vectorVec3toString", wren_foreign_method_fn!(vec3_to_string));
+        map.insert(
+            "vectorVec3toString",
+            wren_foreign_method_fn!(vec3_to_string),
+        );
         map.insert("vectorVec3norm()", wren_foreign_method_fn!(vec3_norm));
         map.insert("vectorVec3dot(_)", wren_foreign_method_fn!(vec3_dot));
         map.insert("vectorVec3cross(_)", wren_foreign_method_fn!(vec3_cross));
@@ -72,9 +77,11 @@ lazy_static! {
 
 fn vec3_allocate(vm: &mut VM) {
     let ptr = vm.set_slot_new_foreign(0, 0, mem::size_of::<Vec3>()) as *mut Vec3;
-    let vec = Vec3::new(vm.get_slot_double(1).unwrap(),
-                        vm.get_slot_double(2).unwrap(),
-                        vm.get_slot_double(3).unwrap());
+    let vec = Vec3::new(
+        vm.get_slot_double(1).unwrap(),
+        vm.get_slot_double(2).unwrap(),
+        vm.get_slot_double(3).unwrap(),
+    );
     unsafe { ptr::write(ptr, vec) };
 }
 
@@ -147,17 +154,20 @@ fn vec3_set_z(vm: &mut VM) {
     unsafe { (*vec).z = z };
 }
 
-fn bind_method(_: &mut VM,
-               module: &str,
-               class_name: &str,
-               is_static: bool,
-               signature: &str)
-               -> ForeignMethodFn {
-    let full_signature = format!("{}{}{}{}",
-                                 module,
-                                 class_name,
-                                 signature,
-                                 if is_static { "s" } else { "" });
+fn bind_method(
+    _: &mut VM,
+    module: &str,
+    class_name: &str,
+    is_static: bool,
+    signature: &str,
+) -> ForeignMethodFn {
+    let full_signature = format!(
+        "{}{}{}{}",
+        module,
+        class_name,
+        signature,
+        if is_static { "s" } else { "" }
+    );
     *FOREIGN_METHODS.get::<str>(&full_signature).unwrap_or(&None)
 }
 
@@ -171,16 +181,17 @@ fn bind_class(_: &mut VM, module: &str, class_name: &str) -> ForeignClassMethods
 }
 
 fn load_module(_: &mut VM, name: &str) -> Option<String> {
-    use std::path::Path;
     use std::fs::File;
     use std::io::Read;
+    use std::path::Path;
 
     let mut path = Path::new("examples/scripts").join(&name);
     path.set_extension("wren");
     let mut buffer = String::new();
     if File::open(path)
-           .map(|mut f| f.read_to_string(&mut buffer))
-           .is_ok() {
+        .map(|mut f| f.read_to_string(&mut buffer))
+        .is_ok()
+    {
         Some(buffer)
     } else {
         None
